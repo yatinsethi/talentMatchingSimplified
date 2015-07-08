@@ -47,7 +47,7 @@ public class SMP {
 
 	// Remove matching between C and T 
 	private void freeTalent(Company c, Talent t) {
-
+		
 	}
 
 	// returns the Company C's ranking of Talent T
@@ -75,7 +75,7 @@ public class SMP {
 		matching = new HashMap<Talent, Company>();
 		ArrayList<Talent> talents = new ArrayList<Talent>();
 		ArrayList<Companies> companies = new ArrayList<Companies>();
-		for (Talent T : talents) {
+		for (Talent T : talents) { // Broken will fix later
 			if (T.markedCompanies.size() != talentRankings.size()) {
 				// Find highest ranked company of talent t
 				c = topCompany(t);
