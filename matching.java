@@ -3,6 +3,8 @@ import java.util.*;
 public class SMP {
 
 	HashMap<Talent, Company> matching;
+	int maxSeating;
+
 	public Talent(int numCompanies) {
 		int numCompaniesMatched = numCompanies;
 		HashMap<Company, Integer> companyRankings = new HashMap<Company, Integer>();
@@ -72,23 +74,31 @@ public class SMP {
 
 
 	public static void main(String[] argv) {
+		maxSeating = 0;
 		matching = new HashMap<Talent, Company>();
 		ArrayList<Talent> talents = new ArrayList<Talent>();
 		ArrayList<Companies> companies = new ArrayList<Companies>();
-		for (Talent T : talents) { // Broken will fix later
-			if (T.markedCompanies.size() != talentRankings.size()) {
-				// Find highest ranked company of talent t
-				c = topCompany(t);
-				// if Company is free
-				if (c.numSeats > 0) {
-					matchPair(T, c);
-				} 
-				else {
-					Talent minRanking = minTalent(c);
-					if (talentWeight(c, T) > talentWeight(c, minRanking))
-					{
-						matchPair(c, T);
-						freeTalent(c, minRanking);
+		int maxSeating = 0;
+		for (Company C: companies) {
+			maxSeating += C.numSeats;
+		}
+		while (totalSeatsTaken != maxSeating) {
+			for (Talent T : talents) { // Broken will fix later
+				if (T.markedCompanies.size() != talentRankings.size()) {
+					// Find highest ranked company of talent t
+					c = topCompany(t);
+					// if Company is free
+					if (c.numSeats > 0 && T.numCompanies > 0) {
+						matchPair(T, c);
+						totalSeatsTaken++;
+					} 
+					else {
+						Talent minRanking = minTalent(c);
+						if (talentWeight(c, T) > talentWeight(c, minRanking))
+						{
+							matchPair(c, T);
+							freeTalent(c, minRanking);
+						}
 					}
 				}
 			}
