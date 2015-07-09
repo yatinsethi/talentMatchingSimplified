@@ -2,8 +2,8 @@ import java.util.*;
 
 public class SMP {
 
-	HashMap<Talent, Company> matching;
-	int maxSeating;
+	HashMap<Talent, ArrayList<Company>> matching;
+	int totalSeatsTaken;
 
 	public Talent(int numCompanies) {
 		int numCompaniesMatched = numCompanies;
@@ -34,22 +34,33 @@ public class SMP {
 
 	private void matchPair(Talent t, Company c) {
 		// Create matching
-		matching.add(T, c); 
+		if (!matching.containsKey(t)) {
+			matching.put(t, new ArrayList<Company>());
+		}
+		matching.get(t).add(c);
 
 		// Decrement Counters
-		T.numCompanies--;
+		t.numCompanies--;
 		c.numSeats--;
 
 		// Mark both company and talent
 		int cRank = talentRankings.get(c);
 		int tRank = companyRankings.get(T);
-		T.markedCompanies.add(c, cRank);
-		c.markedCompanies.add(T, tRank);
+		t.markedCompanies.add(c, cRank);
+		c.markedTalents.add(T, tRank);
 	}
 
 	// Remove matching between C and T 
 	private void freeTalent(Company c, Talent t) {
-		
+		ArrayList<Talent> companyList = matching.get(t);
+		for (Company C: companyList) {
+			if (c.equals(C) {
+				companyList.remove(C);
+			}
+		}
+		matchings.put(t, companyList);
+		t.numCompanies++;
+		c.numSeats++;
 	}
 
 	// returns the Company C's ranking of Talent T
@@ -74,16 +85,23 @@ public class SMP {
 
 
 	public static void main(String[] argv) {
-		maxSeating = 0;
-		matching = new HashMap<Talent, Company>();
+		// Initialize Global Variables
+		totalSeatsTaken = 0;
+		matching = new HashMap<Talent, ArrayList<Company>>();
+
+		// Create ArrayList of Talents and Companies
 		ArrayList<Talent> talents = new ArrayList<Talent>();
 		ArrayList<Companies> companies = new ArrayList<Companies>();
+		
+		// Computes the maximum number of seats available
 		int maxSeating = 0;
 		for (Company C: companies) {
 			maxSeating += C.numSeats;
 		}
+
+		// While there are still seats available
 		while (totalSeatsTaken != maxSeating) {
-			for (Talent T : talents) { // Broken will fix later
+			for (Talent T : talents) { // For each talent, see if valid matching
 				if (T.markedCompanies.size() != talentRankings.size()) {
 					// Find highest ranked company of talent t
 					c = topCompany(t);
