@@ -1,12 +1,12 @@
 import java.util.*;
 import java.io.*;
 
-public class SMP {
+public class MatchAlgo {
 	
 	ArrayList<Talent> talents;
 	ArrayList<Company> companies;
 
-	public SMP(String talentFileName, String companyFileName, int numCompanies, int numSeats, int companyCapacity) {
+	public MatchAlgo(String talentFileName, String companyFileName, int numCompanies, int numSeats, int companyCapacity) {
 		BufferedReader br1 = null;
 		BufferedReader br2 = null;
 		String line = "";
@@ -238,23 +238,20 @@ public class SMP {
 		return minTalent;
 	}
 
-
 	public static void main(String[] argv) {
-		
-		// Take in set of arguments
 		String talentFileName = argv[0];
 		String companyFileName = argv[1];
 		int numCompanies = Integer.parseInt(argv[2]);
 		int numAttendees = Integer.parseInt(argv[3]);
 		int numSessions = Integer.parseInt(argv[4]);
-		
+
 		int aveSeatPerSession = numAttendees/numCompanies;
-		// Initialize talents and companies from file
-		SMP smp = new SMP(talentFileName, companyFileName, numCompanies, aveSeatPerSession, numSessions);
+
+		MatchAlgo match = new MatchAlgo(talentFileName, companyFileName, numCompanies, aveSeatPerSession, numSessions);
 		
 		// Reads in CSV files and generates list of Companies and Talents
-		ArrayList<Company> companies = smp.companies;
-		ArrayList<Talent> talents = smp.talents;
+		ArrayList<Company> companies = match.companies;
+		ArrayList<Talent> talents = match.talents;
 
 		// Initialize Global Variables
 		int totalSeatsTaken = 0;
@@ -265,57 +262,38 @@ public class SMP {
 		
 		int seatsPerSession = numAttendees;
 		int maxSeats = numAttendees * numSessions;
-		// Computes the maximum number of seats available
-		int maxSeats = 0;
-		for (Company C: companies) {
-			maxSeats += C.getNumSeats();
-		}
-		int maxCompanies = 0;
+
 		for (Talent T : talents) {
-			maxCompanies += T.getNumCompanies();
-		}
-		System.out.println("Max Companies: " + maxCompanies);
-		System.out.println("Max Seats: " + maxSeats);
-
-		// Choosest smaller value to ensure that program halts
-		int smallest = maxSeats;
-		if (maxSeats < maxCompanies) {
-			smallest = maxSeats;
-		} else if (maxCompanies < maxSeats) {
-			smallest = maxCompanies;
+			T.setNumCompanies(1);
 		}
 
-		// While there are still seats available
-		int iterationCounter = 1;
-		while (totalSeatsTaken != smallest) {
-			for (Talent T : talents) { 
-				// For each talent, see if valid matching
+		for (int i = 0; i < numSessions; i++) {
+			while (totalSeatsTaken != seatsPerSession) {
+				for (Talent T : talents) { 
 
-				// Find highest ranked company of talent t
-				Company c = smp.topCompany(T, talentMatching, companies);
-				if (T.getNumCompanies() > 0) {
-					System.out.println("this: " + T.getName());
-				}
-				// if Company is free 
-				if (c.getNumSeats() > 0) {
-					if (T.getNumCompanies() > 0) {
-						smp.matchPair(T, c, talentMatching, companyMatching);
+					// Find highest ranked company of talent t
+					Company c = match.topCompany(T, talentMatching, companies);
+
+					// if Company is free 
+					if (c.getNumSeats() > 0) {
+						match.matchPair(T, c, talentMatching, companyMatching);
 						totalSeatsTaken++;
-					}
-				} 
-				else {
-					// if minimum talent in marked list has weight less than current talent
-					if (T.getNumCompanies() > 0) {
-						Talent minTalent = smp.minMarkedTalent(c);
-						if (smp.talentWeight(c, T) > smp.talentWeight(c, minTalent))
+					} 
+					else {
+						// if minimum talent in marked list has weight less than current talent
+						Talent minTalent = match.minMarkedTalent(c);
+						System.out.println("huh");
+						if (match.talentWeight(c, T) > match.talentWeight(c, minTalent))
 						{
-							smp.freeTalent(c, minTalent, talentMatching, companyMatching);
-							smp.matchPair(T, c, talentMatching, companyMatching);
+							match.freeTalent(c, minTalent, talentMatching, companyMatching);
+							match.matchPair(T, c, talentMatching, companyMatching);
 						}
 					}
 				}
 			}
-			iterationCounter++;
 		}
+		System.out.println(talentMatching);
+		System.out.println(companyMatching);
 	}
 }
+

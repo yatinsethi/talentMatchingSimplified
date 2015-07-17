@@ -19,6 +19,14 @@ public class Talent {
 		return this.talentName;
 	}
 
+	public void decrementNumCompanies() {
+		this.numCompanies--;
+	}
+
+	public void incrementNumCompanies() {
+		this.numCompanies++;
+	}
+
 	public HashMap<String, Integer> getCompanyRankings() {
 		return this.companyRankings;
 	}
@@ -29,6 +37,10 @@ public class Talent {
 
 	public int getNumCompanies() {
 		return this.numCompanies;
+	}
+
+	public void setNumCompanies(int x) {
+		this.numCompanies = x;
 	}
 }
 

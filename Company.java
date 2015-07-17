@@ -18,6 +18,14 @@ public class Company {
 		return this.numSeats;
 	}
 
+	public void decrementNumSeats() {
+		this.numSeats--;
+	}
+
+	public void incrementNumSeats() {
+		this.numSeats++;
+	}
+
 	public String getName() {
 		return this.companyName;
 	}
