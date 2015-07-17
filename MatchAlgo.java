@@ -282,7 +282,6 @@ public class MatchAlgo {
 					else {
 						// if minimum talent in marked list has weight less than current talent
 						Talent minTalent = match.minMarkedTalent(c);
-						System.out.println("huh");
 						if (match.talentWeight(c, T) > match.talentWeight(c, minTalent))
 						{
 							match.freeTalent(c, minTalent, talentMatching, companyMatching);
@@ -291,9 +290,17 @@ public class MatchAlgo {
 					}
 				}
 			}
+			for (Company C : companies) {
+				C.setNumSeats(aveSeatPerSession);
+			}
+			for (Talent T : talents) {
+				T.setNumCompanies(1);
+			}
+			totalSeatsTaken = 0;
+			// System.out.println(talentMatching);
+			// System.out.println(companyMatching);
+
 		}
-		System.out.println(talentMatching);
-		System.out.println(companyMatching);
 	}
 }
 

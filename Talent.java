@@ -15,6 +15,10 @@ public class Talent {
 		markedCompanies = new HashMap<Company, Integer>();
 	}
 
+	public void resetMarkedCompanies() {
+		this.markedCompanies = new HashMap<Company, Integer>();
+	}
+
 	public String getName() {
 		return this.talentName;
 	}

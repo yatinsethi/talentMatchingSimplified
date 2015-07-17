@@ -245,12 +245,11 @@ public class SMP {
 		String talentFileName = argv[0];
 		String companyFileName = argv[1];
 		int numCompanies = Integer.parseInt(argv[2]);
-		int numAttendees = Integer.parseInt(argv[3]);
-		int numSessions = Integer.parseInt(argv[4]);
+		int numSeats = Integer.parseInt(argv[3]);
+		int companyCapacity = Integer.parseInt(argv[4]);
 		
-		int aveSeatPerSession = numAttendees/numCompanies;
 		// Initialize talents and companies from file
-		SMP smp = new SMP(talentFileName, companyFileName, numCompanies, aveSeatPerSession, numSessions);
+		SMP smp = new SMP(talentFileName, companyFileName, numCompanies, numSeats, companyCapacity);
 		
 		// Reads in CSV files and generates list of Companies and Talents
 		ArrayList<Company> companies = smp.companies;
@@ -263,8 +262,6 @@ public class SMP {
 		HashMap<Talent, ArrayList<Company>> talentMatching = new HashMap<Talent, ArrayList<Company>>();
 		HashMap<Company, ArrayList<Talent>> companyMatching = new HashMap<Company, ArrayList<Talent>>();
 		
-		int seatsPerSession = numAttendees;
-		int maxSeats = numAttendees * numSessions;
 		// Computes the maximum number of seats available
 		int maxSeats = 0;
 		for (Company C: companies) {
@@ -293,7 +290,7 @@ public class SMP {
 
 				// Find highest ranked company of talent t
 				Company c = smp.topCompany(T, talentMatching, companies);
-				if (T.getNumCompanies() > 0) {
+				if (T.getNumSeats() > 0) {
 					System.out.println("this: " + T.getName());
 				}
 				// if Company is free 

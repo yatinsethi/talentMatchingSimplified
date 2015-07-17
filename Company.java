@@ -14,6 +14,10 @@ public class Company {
 		markedTalents = new HashMap<Talent, Integer>();
 	}
 
+	public void resetMarkedTalents() {
+		this.markedTalents = new HashMap<Talent, Integer>();
+	}
+
 	public int getNumSeats() {
 		return this.numSeats;
 	}
@@ -24,6 +28,10 @@ public class Company {
 
 	public void incrementNumSeats() {
 		this.numSeats++;
+	}
+
+	public void setNumSeats(int x) {
+		this.numSeats = x;
 	}
 
 	public String getName() {
@@ -37,6 +45,7 @@ public class Company {
 	public HashMap<Talent, Integer> getMarkedTalents() {
 		return this.markedTalents;
 	}
+
 
 
 
