@@ -5,8 +5,9 @@ public class MatchAlgo {
 	
 	ArrayList<Talent> talents;
 	ArrayList<Company> companies;
-
+	int x = 0;
 	public MatchAlgo(String talentFileName, String companyFileName, int numCompanies, int numSeats, int companyCapacity) {
+
 		BufferedReader br1 = null;
 		BufferedReader br2 = null;
 		String line = "";
@@ -132,19 +133,29 @@ public class MatchAlgo {
 
 	/* Takes Talent t and Company c and matches them by adding them to matching
 	   After matching t to c, marks both the talent and company */
-	private void matchPair(Talent t, Company c, HashMap<Talent, ArrayList<Company>> talentMatching, HashMap<Company, ArrayList<Talent>> companyMatching) { // checked
+	private void matchPair(Talent t, Company c, HashMap<Talent, 
+							ArrayList<Company>> talentMatching, HashMap<Company, ArrayList<Talent>> companyMatching,
+							HashMap<Talent, ArrayList<Company>> talentMatchingSession, HashMap<Company, ArrayList<Talent>> companyMatchingSession) { // checked
 		// Create Talent-Company Matching
 		if (!talentMatching.containsKey(t)) {
 			talentMatching.put(t, new ArrayList<Company>());
 		}
 		talentMatching.get(t).add(c);
-
+		// Adds talents per session
+		if (!talentMatchingSession.containsKey(t)) {
+			talentMatchingSession.put(t, new ArrayList<Company>());
+		}
+		talentMatchingSession.get(t).add(c);
 		// Create Company-Talent Matching
 		if (!companyMatching.containsKey(c)) {
 			companyMatching.put(c, new ArrayList<Talent>());
 		}
 		companyMatching.get(c).add(t);
-
+		// Adds companies per session
+		if (!companyMatchingSession.containsKey(c)) {
+			companyMatchingSession.put(c, new ArrayList<Talent>());
+		}
+		companyMatchingSession.get(c).add(t);
 		// Decrement Counters
 		t.decrementNumCompanies();
 		c.decrementNumSeats();
@@ -159,32 +170,34 @@ public class MatchAlgo {
 	// Remove matching between C and T 
 	private void freeTalent(Company c, Talent t, HashMap<Talent, ArrayList<Company>> talentMatching, HashMap<Company, ArrayList<Talent>> companyMatching) { // checked
 		// Finds and removes proper matching for Talent-Company matching
-		ArrayList<Company> companyList = talentMatching.get(t);
-		companyList.remove(c);
-		talentMatching.put(t, companyList);
+		if (matched(t, c, talentMatching)) {
+			ArrayList<Company> companyList = talentMatching.get(t);
+			companyList.remove(c);
+			talentMatching.put(t, companyList);
 
-		// Removes the key from the list if the talent has no matchings
-		if (talentMatching.get(t).isEmpty()) {
-			talentMatching.remove(t);
+			// Removes the key from the list if the talent has no matchings
+			if (talentMatching.get(t).isEmpty()) {
+				talentMatching.remove(t);
+			}
+
+			// Finds and removes proper matching for Company-Talent matching
+			ArrayList<Talent> talentList = companyMatching.get(c);
+			talentList.remove(t);
+			companyMatching.put(c, talentList);
+
+			// Removes the key from the list if the talent has no matchings
+			if (companyMatching.get(c).isEmpty()) {
+				companyMatching.remove(c);
+			}
+
+			// Increment Counters
+			t.incrementNumCompanies();
+			c.incrementNumSeats();
+
+			// Unmark both company and talent
+			t.markedCompanies.remove(c);
+			c.markedTalents.remove(t);
 		}
-
-		// Finds and removes proper matching for Company-Talent matching
-		ArrayList<Talent> talentList = companyMatching.get(c);
-		talentList.remove(t);
-		companyMatching.put(c, talentList);
-
-		// Removes the key from the list if the talent has no matchings
-		if (companyMatching.get(c).isEmpty()) {
-			companyMatching.remove(c);
-		}
-
-		// Increment Counters
-		t.incrementNumCompanies();
-		c.incrementNumSeats();
-
-		// Unmark both company and talent
-		t.markedCompanies.remove(c);
-		c.markedTalents.remove(t);
 	}
 
 	// Returns the top-ranked company not yet matched
@@ -193,13 +206,15 @@ public class MatchAlgo {
 		int max = -1;
 
 		for (String S : t.getCompanyRankings().keySet()) {
-
 			Company C = null;
 			for (Company temp : companies) {
 				if (S.equals(temp.getName())) 
 					C = temp;
 			}
-			if (!matched(t, C, talentMatching)) {
+			if (!matched(t, C, talentMatching) && talentWeight(C, t) == 1 && C.getNumSeats() > 0) {
+				if (x == 88) {
+					System.out.println(C.getName());
+				}
 				int val = t.getCompanyRankings().get(C.getName());
 				if (val > max) {
 					topCompany = C; 
@@ -245,7 +260,7 @@ public class MatchAlgo {
 		int numAttendees = Integer.parseInt(argv[3]);
 		int numSessions = Integer.parseInt(argv[4]);
 
-		int aveSeatPerSession = numAttendees/numCompanies;
+		int aveSeatPerSession = numAttendees/numCompanies + 1;
 
 		MatchAlgo match = new MatchAlgo(talentFileName, companyFileName, numCompanies, aveSeatPerSession, numSessions);
 		
@@ -259,37 +274,35 @@ public class MatchAlgo {
 		// Matching results for Talent-Company and Company-Talent
 		HashMap<Talent, ArrayList<Company>> talentMatching = new HashMap<Talent, ArrayList<Company>>();
 		HashMap<Company, ArrayList<Talent>> companyMatching = new HashMap<Company, ArrayList<Talent>>();
-		
+		ArrayList<HashMap<Talent, ArrayList<Company>>> talentMatchingSessions = new ArrayList<HashMap<Talent, ArrayList<Company>>>();
+		ArrayList<HashMap<Company, ArrayList<Talent>>> companyMatchingSessions = new ArrayList<HashMap<Company, ArrayList<Talent>>>();
+
 		int seatsPerSession = numAttendees;
 		int maxSeats = numAttendees * numSessions;
 
 		for (Talent T : talents) {
 			T.setNumCompanies(1);
 		}
-
 		for (int i = 0; i < numSessions; i++) {
+			HashMap<Talent, ArrayList<Company>> talentMatchingSession = new HashMap<Talent, ArrayList<Company>>();
+			HashMap<Company, ArrayList<Talent>> companyMatchingSession = new HashMap<Company, ArrayList<Talent>>();
 			while (totalSeatsTaken != seatsPerSession) {
 				for (Talent T : talents) { 
-
-					// Find highest ranked company of talent t
-					Company c = match.topCompany(T, talentMatching, companies);
-
-					// if Company is free 
-					if (c.getNumSeats() > 0) {
-						match.matchPair(T, c, talentMatching, companyMatching);
-						totalSeatsTaken++;
-					} 
-					else {
-						// if minimum talent in marked list has weight less than current talent
-						Talent minTalent = match.minMarkedTalent(c);
-						if (match.talentWeight(c, T) > match.talentWeight(c, minTalent))
-						{
-							match.freeTalent(c, minTalent, talentMatching, companyMatching);
-							match.matchPair(T, c, talentMatching, companyMatching);
-						}
+					if (T.getNumCompanies() > 0) {
+						// Find highest ranked company of talent t
+						Company c = match.topCompany(T, talentMatching, companies);
+						// if Company is free 
+						if (c.getNumSeats() > 0 && match.talentWeight(c, T) != 0) {
+							if (!match.matched(T, c, talentMatching)) {
+								match.matchPair(T, c, talentMatching, companyMatching, talentMatchingSession, companyMatchingSession);
+								totalSeatsTaken++;
+							}
+						} 
 					}
 				}
 			}
+			talentMatchingSessions.add(talentMatchingSession);
+			companyMatchingSessions.add(companyMatchingSession);
 			for (Company C : companies) {
 				C.setNumSeats(aveSeatPerSession);
 			}
@@ -297,10 +310,52 @@ public class MatchAlgo {
 				T.setNumCompanies(1);
 			}
 			totalSeatsTaken = 0;
-			// System.out.println(talentMatching);
-			// System.out.println(companyMatching);
+		}
+		HashMap<Talent, ArrayList<Company>> printList = new HashMap<Talent, ArrayList<Company>>(); 
+		for (HashMap<Talent, ArrayList<Company>> list : talentMatchingSessions) {
+			for (Talent T : list.keySet()) {
+				if (!printList.containsKey(T)) {
+					printList.put(T, new ArrayList<Company>());
+				}
+				printList.get(T).add(list.get(T).get(0));
+			}
+		}
+		String print = "";
+		for (Talent J : printList.keySet()) {
+			print = print + J.getName() + ", ";
+			for (Company C : printList.get(J)) {
+				print = print + C.getName() + ", ";
+			}
+			System.out.println(print.substring(0, print.length() - 2));
+			print = "";
+		}
+		HashMap<Company, ArrayList<ArrayList<Talent>>> companyPrintList = new HashMap<Company, ArrayList<ArrayList<Talent>>>();
+		for (HashMap<Company, ArrayList<Talent>> list : companyMatchingSessions) {
+			for (Company C : list.keySet()) {
+				if (!companyPrintList.containsKey(C)) {
+					companyPrintList.put(C, new ArrayList<ArrayList<Talent>>());
+				}
+				companyPrintList.get(C).add(list.get(C));
+			}
+		}
+		System.out.println("---");
+		String companyPrint = "";
+		for (Company C : companyPrintList.keySet()) {
+			companyPrint = companyPrint + C.getName() + ", ";
+			String line = "";
+			for (ArrayList<Talent> seshList : companyPrintList.get(C)) {
+				for (Talent T : seshList) {
+					line = line + T.getName() + ", ";
+				}
+				String companyLine = companyPrint + line;
+				System.out.println(companyLine.substring(0, companyLine.length() - 2));
+				line = "";
+			}
+			
+			companyPrint = "";
 
 		}
+
 	}
 }
 
